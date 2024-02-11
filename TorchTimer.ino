@@ -17,7 +17,7 @@ Adafruit_ST7789 tft = Adafruit_ST7789(TFT_CS, TFT_DC, TFT_RST);
 #define BITMAP_WIDTH 100
 #define BITMAP_HEIGHT 150
 
-//Below here are the bitmaps for each frame of the fire animation, named flamesXX (from 01 to 25)
+//Below here are the bitmaps for each frame of the fire animation, named flamesXX (from 1 to 5)
 const uint16_t torch1[BITMAP_WIDTH * BITMAP_HEIGHT] PROGMEM={
 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000,   // 0x0010 (16) pixels
 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000,   // 0x0020 (32) pixels
@@ -4733,7 +4733,7 @@ const int16_t pauseX = 38; //(SCREEN_WIDTH / 2) - ((pauseBarWidth * 3) / 2);
 const int16_t pauseY = 90; //(SCREEN_HEIGHT / 2) - (pauseBarHeight / 2);
 const uint8_t pauseButton = 5;
 const uint8_t resetButton = 6;
-const uint8_t advanceTimeButton = 10;
+const uint8_t advanceTimeButton = 9;
 const uint32_t debounceMs = 200;
 
 void drawTorch() {
