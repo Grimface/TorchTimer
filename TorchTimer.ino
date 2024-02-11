@@ -4838,15 +4838,15 @@ void loop() {
     pauseTimer();
   }
 
-  if (digitalRead(advanceTimeButton) == HIGH) {
-    hurryTimer();
-  }
-
-  if (digitalRead(resetButton) == HIGH) {
-    resetTimer();
-  }
-
   if (!isPaused) {
+    // We don't want to mess with the time, 
+    // or display it accidentally, while paused.
+    if (digitalRead(advanceTimeButton) == HIGH) {
+      hurryTimer();
+    }
+    if (digitalRead(resetButton) == HIGH) {
+      resetTimer();
+    }    
     drawTorch();
     adjustTimer();
   }
