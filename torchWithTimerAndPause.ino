@@ -17,7 +17,7 @@ Adafruit_ST7789 tft = Adafruit_ST7789(TFT_CS, TFT_DC, TFT_RST);
 #define BITMAP_WIDTH 100
 #define BITMAP_HEIGHT 150
 
-//Below here are the bitmaps for each frame of the fire animation, named flamesXX (from 01 to 25)
+//Below here are the bitmaps for each frame of the fire animation, named flamesXX (from 1 to 5)
 const uint16_t torch1[BITMAP_WIDTH * BITMAP_HEIGHT] PROGMEM={
 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000,   // 0x0010 (16) pixels
 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000,   // 0x0020 (32) pixels
