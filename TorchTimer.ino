@@ -17,7 +17,7 @@ Adafruit_ST7789 tft = Adafruit_ST7789(TFT_CS, TFT_DC, TFT_RST);
 #define BITMAP_WIDTH 100
 #define BITMAP_HEIGHT 150
 
-//Below here are the bitmaps for each frame of the fire animation, named flamesXX (from 1 to 5)
+//Below here are the bitmaps for each frame of the fire animation, named flamesXX (from 01 to 25)
 const uint16_t torch1[BITMAP_WIDTH * BITMAP_HEIGHT] PROGMEM={
 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000,   // 0x0010 (16) pixels
 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000,   // 0x0020 (32) pixels
@@ -4724,8 +4724,84 @@ const uint16_t *torchFrames[TORCH_ARR_LENGTH] = {
 short frameCounter = 0;
 short minutesRemaining = 60;
 long lastTimeMillis = 0;
-const long ONE_MINUTE = 60000;
+const long oneMinute = 60000;
 bool isPaused = false;
+
+const int16_t pauseBarWidth = 20;
+const int16_t pauseBarHeight = 60;
+const int16_t pauseX = 38; //(SCREEN_WIDTH / 2) - ((pauseBarWidth * 3) / 2);
+const int16_t pauseY = 90; //(SCREEN_HEIGHT / 2) - (pauseBarHeight / 2);
+const uint8_t pauseButton = 5;
+const uint8_t resetButton = 6;
+const uint8_t advanceTimeButton = 10;
+const uint32_t debounceMs = 200;
+
+void drawTorch() {
+  tft.drawRGBBitmap(17, 90, torchFrames[frameCounter], BITMAP_WIDTH, BITMAP_HEIGHT);
+  frameCounter++;
+  if (frameCounter >= TORCH_ARR_LENGTH) {
+    frameCounter = 0;
+  }
+}
+
+void drawPausedSymbol() {
+  tft.fillScreen(ST77XX_BLACK);
+  tft.fillRect(pauseX,                       pauseY, pauseBarWidth, pauseBarHeight, ST77XX_WHITE);
+  tft.fillRect(pauseX + (pauseBarWidth * 2), pauseY, pauseBarWidth, pauseBarHeight, ST77XX_WHITE);
+}
+
+void pauseTimer() {
+  isPaused = !isPaused;
+  delay(debounceMs);
+  if (isPaused) {
+    digitalWrite(LED_BUILTIN, HIGH);
+    drawPausedSymbol();
+  }
+  else {
+    digitalWrite(LED_BUILTIN, LOW);
+    tft.fillScreen(ST77XX_BLACK);
+    printMinutesRemaining();
+  }
+}
+
+void printMinutesRemaining() {
+  tft.fillRect(0, 0, SCREEN_WIDTH, 40, ST77XX_BLACK);
+  tft.setTextColor(ST77XX_WHITE);
+  int textOffset = 45;
+  //the is left-justified, so single digits need to be further to the right.
+  if (minutesRemaining < 10) {
+    textOffset = 60;
+  }
+  tft.setCursor(textOffset, 0); //Puts the text more or less in the middle at the top
+  tft.print(minutesRemaining);
+}
+
+void adjustTimer() {
+  long currentTimeMillis = millis();
+  if (currentTimeMillis - lastTimeMillis >= oneMinute) {
+    lastTimeMillis = currentTimeMillis;
+    minutesRemaining--;
+    if (minutesRemaining < 0) {
+      minutesRemaining = 0;
+    }
+    printMinutesRemaining();
+  }
+}
+
+void hurryTimer() {
+  delay(debounceMs);
+  minutesRemaining -= 10;
+  if (minutesRemaining <0) {
+    minutesRemaining = 0;
+  }
+  printMinutesRemaining();
+}
+
+void resetTimer(){
+  delay(debounceMs);
+  minutesRemaining = 60;
+  printMinutesRemaining();
+}
 
 void setup(void) {
   Serial.begin(9600);
@@ -4735,7 +4811,9 @@ void setup(void) {
   pinMode(TFT_BACKLITE, OUTPUT);
   digitalWrite(TFT_BACKLITE, HIGH);
 
-  pinMode(5, INPUT);
+  pinMode(pauseButton, INPUT); //Pause
+  pinMode(resetButton, INPUT); //Reset
+  pinMode(advanceTimeButton, INPUT); //-10 minutes
   
   pinMode(LED_BUILTIN, OUTPUT);
   digitalWrite(LED_BUILTIN, LOW);
@@ -4756,47 +4834,20 @@ void setup(void) {
 }
 
 void loop() {
-  if (digitalRead(5) == HIGH) {
-    pausePressed();
+  if (digitalRead(pauseButton) == HIGH) {
+    pauseTimer();
   }
-  drawTorch();
-  frameCounter++;
-  if (frameCounter >= TORCH_ARR_LENGTH) {
-    frameCounter = 0;
-  }
-  long currentTimeMillis = millis();
-  if (currentTimeMillis - lastTimeMillis >= ONE_MINUTE) {
-    lastTimeMillis = currentTimeMillis;
-    minutesRemaining--;
-    if (minutesRemaining < 0) {
-      minutesRemaining = 0;
-    }
-    printMinutesRemaining();
-  }
-}
- 
-void drawTorch() {
-  tft.drawRGBBitmap(17, 90, torchFrames[frameCounter], BITMAP_WIDTH, BITMAP_HEIGHT);
-}
 
-void pausePressed() {
-  isPaused = !isPaused;
-  if (isPaused) {
-    digitalWrite(LED_BUILTIN, HIGH);
+  if (digitalRead(advanceTimeButton) == HIGH) {
+    hurryTimer();
   }
-  else {
-    digitalWrite(LED_BUILTIN, LOW);
-  }
-}
 
-void printMinutesRemaining() {
-  tft.fillRect(0, 0, SCREEN_WIDTH, 40, ST77XX_BLACK);
-  tft.setTextColor(ST77XX_WHITE);
-  int textOffset = 45;
-  //the is left-justified, so single digits need to be further to the right.
-  if (minutesRemaining < 10) {
-    textOffset = 60;
+  if (digitalRead(resetButton) == HIGH) {
+    resetTimer();
   }
-  tft.setCursor(textOffset, 0); //Puts the text more or less in the middle at the top
-  tft.print(minutesRemaining);
+
+  if (!isPaused) {
+    drawTorch();
+    adjustTimer();
+  }
 }
