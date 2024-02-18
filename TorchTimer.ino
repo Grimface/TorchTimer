@@ -4316,12 +4316,12 @@ const uint16_t torch5[BITMAP_WIDTH * BITMAP_HEIGHT] PROGMEM={
 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000,   // 0x21B0 (8624) pixels
 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0xFD80, 0xFD80, 0xFD80, 0xFD80, 0xFD80, 0xFD80, 0xFD80, 0xFD80, 0xFD80, 0xFD80,   // 0x21C0 (8640) pixels
 0xF283, 0xF283, 0xF283, 0xF283, 0xF283, 0xF283, 0xF283, 0xF283, 0xF283, 0xF283, 0xFC60, 0xFC60, 0xFC60, 0xFC60, 0xFC60, 0xFC60,   // 0x21D0 (8656) pixels
+0xFD80, 0xFD80, 0xFD80, 0xFD80, 0xF283, 0xF283, 0xF283, 0xF283, 0xF283, 0xF283, 0xF283, 0xF283, 0xF283, 0xF283, 0xFC60, 0xFC60,   // 0x2230 (8752) pixels
 0xFC60, 0xFC60, 0xFC60, 0xFC60, 0xF283, 0xF283, 0xF283, 0xF283, 0xF283, 0xF283, 0xF283, 0xF283, 0xF283, 0xF283, 0x0000, 0x0000,   // 0x21E0 (8672) pixels
 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000,   // 0x21F0 (8688) pixels
 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000,   // 0x2200 (8704) pixels
 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000,   // 0x2210 (8720) pixels
 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0xFD80, 0xFD80, 0xFD80, 0xFD80, 0xFD80, 0xFD80,   // 0x2220 (8736) pixels
-0xFD80, 0xFD80, 0xFD80, 0xFD80, 0xF283, 0xF283, 0xF283, 0xF283, 0xF283, 0xF283, 0xF283, 0xF283, 0xF283, 0xF283, 0xFC60, 0xFC60,   // 0x2230 (8752) pixels
 0xFC60, 0xFC60, 0xFC60, 0xFC60, 0xFC60, 0xFC60, 0xFC60, 0xFC60, 0xF283, 0xF283, 0xF283, 0xF283, 0xF283, 0xF283, 0xF283, 0xF283,   // 0x2240 (8768) pixels
 0xF283, 0xF283, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000,   // 0x2250 (8784) pixels
 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000,   // 0x2260 (8800) pixels
@@ -4727,14 +4727,16 @@ long lastTimeMillis = 0;
 const long oneMinute = 60000;
 bool isPaused = false;
 
-const int16_t pauseBarWidth = 20;
-const int16_t pauseBarHeight = 60;
-const int16_t pauseX = 38; //(SCREEN_WIDTH / 2) - ((pauseBarWidth * 3) / 2);
-const int16_t pauseY = 90; //(SCREEN_HEIGHT / 2) - (pauseBarHeight / 2);
 const uint8_t pauseButton = 5;
 const uint8_t resetButton = 6;
 const uint8_t advanceTimeButton = 9;
 const uint32_t debounceMs = 200;
+
+const int16_t pausedBarWidth = 20;
+const int16_t pausedBarHeight = 60;
+const int16_t pausedX = 38; //(SCREEN_WIDTH / 2) - ((pauseBarWidth * 3) / 2);
+const int16_t pausedY = 90; //(SCREEN_HEIGHT / 2) - (pauseBarHeight / 2);
+
 
 void drawTorch() {
   tft.drawRGBBitmap(17, 90, torchFrames[frameCounter], BITMAP_WIDTH, BITMAP_HEIGHT);
@@ -4746,8 +4748,8 @@ void drawTorch() {
 
 void drawPausedSymbol() {
   tft.fillScreen(ST77XX_BLACK);
-  tft.fillRect(pauseX,                       pauseY, pauseBarWidth, pauseBarHeight, ST77XX_WHITE);
-  tft.fillRect(pauseX + (pauseBarWidth * 2), pauseY, pauseBarWidth, pauseBarHeight, ST77XX_WHITE);
+  tft.fillRect(pausedX,                        pausedY, pausedBarWidth, pausedBarHeight, ST77XX_WHITE);
+  tft.fillRect(pausedX + (pausedBarWidth * 2), pausedY, pausedBarWidth, pausedBarHeight, ST77XX_WHITE);
 }
 
 void pauseTimer() {
@@ -4756,6 +4758,7 @@ void pauseTimer() {
   if (isPaused) {
     digitalWrite(LED_BUILTIN, HIGH);
     drawPausedSymbol();
+    drawPlayButton();
   }
   else {
     digitalWrite(LED_BUILTIN, LOW);
@@ -4776,7 +4779,7 @@ void printMinutesRemaining() {
   tft.print(minutesRemaining);
 }
 
-void adjustTimer() {
+void tickTimer() {
   long currentTimeMillis = millis();
   if (currentTimeMillis - lastTimeMillis >= oneMinute) {
     lastTimeMillis = currentTimeMillis;
@@ -4788,7 +4791,7 @@ void adjustTimer() {
   }
 }
 
-void hurryTimer() {
+void advanceTimer() {
   delay(debounceMs);
   minutesRemaining -= 10;
   if (minutesRemaining <0) {
@@ -4802,6 +4805,37 @@ void resetTimer(){
   minutesRemaining = 60;
   printMinutesRemaining();
 }
+
+const int16_t playHeight = 20;
+const int16_t playWidth = 15;
+const int16_t pauseWidth = playWidth / 3;
+const int16_t playX1 = 10;
+const int16_t playY1 = 40;
+const int16_t playX2 = playX1 + playWidth;
+const int16_t playY2 = playY1 + (playHeight / 2);
+const int16_t playX3 = playX1;
+const int16_t playY3 = playY1 + playHeight;
+
+void drawPlayButton () {
+  tft.fillRect(playX1, playY1, playWidth, playHeight, ST77XX_BLACK);
+  tft.fillTriangle(playX1, playY1, playX2, playY2, playX3, playY3, ST77XX_WHITE);
+}
+
+void drawPauseButton() {
+  tft.fillRect(playX1, playY1, playWidth, playHeight, ST77XX_BLACK); //Clear the area behind the button
+  tft.fillRect(playX1,                    playY1, pauseWidth, playHeight, ST77XX_WHITE);
+  tft.fillRect(playX1 + (2 * pauseWidth), playY1, pauseWidth, playHeight, ST77XX_WHITE);
+}
+
+
+void drawButtons() {
+  //drawPlayButton();
+  drawPauseButton();\
+  // reset
+  // -10 minutes remaining
+  // +10 minutes remaining
+}
+
 
 void setup(void) {
   Serial.begin(9600);
@@ -4842,12 +4876,13 @@ void loop() {
     // We don't want to mess with the time, 
     // or display it accidentally, while paused.
     if (digitalRead(advanceTimeButton) == HIGH) {
-      hurryTimer();
+      advanceTimer();
     }
     if (digitalRead(resetButton) == HIGH) {
       resetTimer();
     }    
     drawTorch();
-    adjustTimer();
+    drawButtons();
+    tickTimer();
   }
 }
