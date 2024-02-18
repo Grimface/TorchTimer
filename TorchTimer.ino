@@ -4758,7 +4758,7 @@ void pauseTimer() {
   if (isPaused) {
     digitalWrite(LED_BUILTIN, HIGH);
     drawPausedSymbol();
-    drawPlayButton();
+    drawPlayIcon();
   }
   else {
     digitalWrite(LED_BUILTIN, LOW);
@@ -4770,7 +4770,8 @@ void pauseTimer() {
 void printMinutesRemaining() {
   tft.fillRect(0, 0, SCREEN_WIDTH, 40, ST77XX_BLACK);
   tft.setTextColor(ST77XX_WHITE);
-  int textOffset = 45;
+  tft.setTextSize(4);
+  int textOffset = 45; //Can't make this a constant as it will vary for 1 or 2 digits.
   //the is left-justified, so single digits need to be further to the right.
   if (minutesRemaining < 10) {
     textOffset = 60;
@@ -4806,34 +4807,83 @@ void resetTimer(){
   printMinutesRemaining();
 }
 
-const int16_t playHeight = 20;
-const int16_t playWidth = 15;
-const int16_t pauseWidth = playWidth / 3;
-const int16_t playX1 = 10;
-const int16_t playY1 = 40;
-const int16_t playX2 = playX1 + playWidth;
-const int16_t playY2 = playY1 + (playHeight / 2);
-const int16_t playX3 = playX1;
-const int16_t playY3 = playY1 + playHeight;
+const int16_t iconSize = 15;
 
-void drawPlayButton () {
-  tft.fillRect(playX1, playY1, playWidth, playHeight, ST77XX_BLACK);
+//The play and pause icons occupy the same screen area, but which is shown depends on the pause state.
+const int16_t pauseWidth = iconSize / 3;
+const int16_t playX1 = 2;
+const int16_t playY1 = 40;
+const int16_t playX2 = playX1 + iconSize;
+const int16_t playY2 = playY1 + (iconSize / 2);
+const int16_t playX3 = playX1;
+const int16_t playY3 = playY1 + iconSize;
+
+void drawPlayIcon () {
+  tft.fillRect(playX1, playY1, iconSize, iconSize, ST77XX_BLACK);
   tft.fillTriangle(playX1, playY1, playX2, playY2, playX3, playY3, ST77XX_WHITE);
 }
 
-void drawPauseButton() {
-  tft.fillRect(playX1, playY1, playWidth, playHeight, ST77XX_BLACK); //Clear the area behind the button
-  tft.fillRect(playX1,                    playY1, pauseWidth, playHeight, ST77XX_WHITE);
-  tft.fillRect(playX1 + (2 * pauseWidth), playY1, pauseWidth, playHeight, ST77XX_WHITE);
+void drawPauseIconMini() {
+  tft.fillRect(playX1, playY1, iconSize, iconSize, ST77XX_BLACK); //Clear the area behind the button
+  tft.fillRect(playX1,                    playY1, pauseWidth, iconSize, ST77XX_WHITE);
+  tft.fillRect(playX1 + (2 * pauseWidth), playY1, pauseWidth, iconSize, ST77XX_WHITE);
 }
 
+const int16_t resetRadius = (iconSize / 2) - 2; 
+const int16_t resetX = playX1;
+const int16_t resetY = playY1 + 120;
+const int16_t resetCircleX = resetX + resetRadius;
+const int16_t resetCircleY = resetY + resetRadius;
+const int16_t resetArrowSize = iconSize * 0.75;
+const int16_t resetArrowX1 = resetCircleX;
+const int16_t resetArrowY1 = resetCircleY - (resetRadius + (resetArrowSize / 2));
+const int16_t resetArrowX2 = resetCircleX + (resetArrowSize * 0.7);
+const int16_t resetArrowY2 = resetCircleY - resetRadius;
+const int16_t resetArrowX3 = resetCircleX;
+const int16_t resetArrowY3 = resetCircleY - (resetRadius - (resetArrowSize / 2));
+// Essentially a circle with a triangle at the top, like an arrow.
+// Unfortunately, the default tft.drawCircle() is 1 pixel wide, which is too narrow.
+// Must have a thin black space between the point of the arrow and the "start" of the circle.
+void drawResetIcon() {
+  // Clear the area behind the icon
+  tft.fillRect(resetX, resetY, iconSize, iconSize, ST77XX_BLACK);
+  // draw a (hollow) circle, 3 pixels wide, by drawing a white filled circle, then a smaller black one over it.
+  tft.fillCircle(resetCircleX,  resetCircleY, resetRadius+2, ST77XX_WHITE);
+  tft.fillCircle(resetCircleX,  resetCircleY, resetRadius-1, ST77XX_BLACK);
+  // draw a black square the same size as the triangle we'll draw
+  tft.fillRect(resetArrowX1, resetArrowY1, resetArrowSize, resetArrowSize, ST77XX_BLACK);
+  // now draw a triangle over that black square
+  tft.fillTriangle(resetArrowX1,resetArrowY1, resetArrowX2,resetArrowY2, resetArrowX3,resetArrowY3, ST77XX_WHITE);
+}
+
+const int16_t plusX = SCREEN_HEIGHT - (iconSize + 2);
+const int16_t plusY = playY1;
+const int16_t plusBarWidth = 5;
+const int16_t plusX1 = plusX + (iconSize/2) - (plusBarWidth/2);
+const int16_t plusY1 = plusY;
+const int16_t plusX2 = plusX;
+const int16_t plusY2 = plusY + (iconSize/2) - (plusBarWidth/2);
+
+void drawPlusIcon() {
+  // Clear the area behind the icon
+  tft.fillRect(plusX, plusY, iconSize, iconSize, ST77XX_BLACK); //Clear the area behind the button
+  tft.fillRect(plusX1, plusY1, plusBarWidth, iconSize, ST77XX_WHITE); //vertical bar
+  tft.fillRect(plusX2, plusY2, iconSize, plusBarWidth, ST77XX_WHITE); //horizontal bar
+}
+
+const int16_t minusX = plusX;
+const int16_t minusY = resetCircleY;
+void drawMinusIcon() {
+  // Clear the area behind the icon
+  tft.fillRect(minusX, minusY, iconSize, iconSize, ST77XX_BLACK); //Clear the area behind the button
+  tft.fillRect(minusX, minusY, iconSize, plusBarWidth, ST77XX_WHITE); //horizontal bar
+}
 
 void drawButtons() {
-  //drawPlayButton();
-  drawPauseButton();\
-  // reset
-  // -10 minutes remaining
-  // +10 minutes remaining
+  drawPauseIconMini();
+  drawResetIcon();
+  drawMinusIcon();
+  drawPlusIcon();
 }
 
 
