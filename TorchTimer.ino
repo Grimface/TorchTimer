@@ -4727,9 +4727,11 @@ long lastTimeMillis = 0;
 const long oneMinute = 60000;
 bool isPaused = false;
 
-const uint8_t pauseButton = 5;
-const uint8_t resetButton = 6;
-const uint8_t advanceTimeButton = 9;
+const uint8_t PAUSE_BUTTON = 35; //5;
+const uint8_t RESET_BUTTON = 18; //6;
+const uint8_t ADD_TIME_BUTTON = 9;
+const uint8_t SUBTRACT_TIME_BUTTON = 13; //10;
+
 const uint32_t debounceMs = 200;
 
 const int16_t pausedBarWidth = 20;
@@ -4792,9 +4794,18 @@ void tickTimer() {
   }
 }
 
-void advanceTimer() {
+void subtractMinutes() {
   delay(debounceMs);
   minutesRemaining -= 10;
+  if (minutesRemaining <0) {
+    minutesRemaining = 0;
+  }
+  printMinutesRemaining();
+}
+
+void addMinutes() {
+  delay(debounceMs);
+  minutesRemaining += 10;
   if (minutesRemaining <0) {
     minutesRemaining = 0;
   }
@@ -4895,10 +4906,10 @@ void setup(void) {
   pinMode(TFT_BACKLITE, OUTPUT);
   digitalWrite(TFT_BACKLITE, HIGH);
 
-  pinMode(pauseButton, INPUT); //Pause
-  pinMode(resetButton, INPUT); //Reset
-  pinMode(advanceTimeButton, INPUT); //-10 minutes
-  
+  pinMode(PAUSE_BUTTON, INPUT); //Pause
+  pinMode(RESET_BUTTON, INPUT); //Reset
+  pinMode(ADD_TIME_BUTTON, INPUT); //-10 minutes
+  pinMode(SUBTRACT_TIME_BUTTON, INPUT);
   pinMode(LED_BUILTIN, OUTPUT);
   digitalWrite(LED_BUILTIN, LOW);
 
@@ -4918,17 +4929,20 @@ void setup(void) {
 }
 
 void loop() {
-  if (digitalRead(pauseButton) == HIGH) {
+  if (digitalRead(PAUSE_BUTTON) == HIGH) {
     pauseTimer();
   }
 
   if (!isPaused) {
     // We don't want to mess with the time, 
     // or display it accidentally, while paused.
-    if (digitalRead(advanceTimeButton) == HIGH) {
-      advanceTimer();
+    if (digitalRead(ADD_TIME_BUTTON) == HIGH) {
+      addMinutes();
     }
-    if (digitalRead(resetButton) == HIGH) {
+    if (digitalRead(SUBTRACT_TIME_BUTTON) == HIGH) {
+      subtractMinutes();
+    }    
+    if (digitalRead(RESET_BUTTON) == HIGH) {
       resetTimer();
     }    
     drawTorch();
